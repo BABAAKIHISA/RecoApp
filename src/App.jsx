@@ -3,7 +3,9 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/data';
 import '@aws-amplify/ui-react/styles.css';
 
-const client = generateClient();
+const client = generateClient({
+  authMode: 'userPool'
+});
 
 export default function App() {
   const [isRecording, setIsRecording] = useState(false);
@@ -81,6 +83,8 @@ export default function App() {
 
       const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
         filename: filename
+      }, {
+        authMode: 'userPool'
       });
 
       if (errors || !uploadUrl) {
