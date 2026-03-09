@@ -1,7 +1,7 @@
 import { defineStorage } from '@aws-amplify/backend';
 
 export const storage = defineStorage({
-    name: 'audioRecorderStorage',
+    name: 'arecoding-upload-baba',
     access: (allow) => ({
         'public/*': [
             allow.authenticated.to(['read', 'write', 'delete']),
