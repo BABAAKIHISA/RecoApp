@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
-import { uploadData } from 'aws-amplify/storage';
+import { generateClient } from 'aws-amplify/data';
 import '@aws-amplify/ui-react/styles.css';
+
+const client = generateClient();
 
 export default function App() {
   const [isRecording, setIsRecording] = useState(false);
@@ -77,17 +79,25 @@ export default function App() {
 
       const filename = `audio_${Date.now()}.${ext}`;
 
-      await uploadData({
-        path: () => `public/${filename}`,
-        data: audioBlob,
-        options: {
-          contentType: audioBlob.type,
-          bucket: {
-            bucketName: 'recoding-upload-baba',
-            region: 'ap-southeast-2'
-          }
+      const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
+        filename: filename
+      });
+
+      if (errors || !uploadUrl) {
+        throw new Error("Failed to generate upload URL: " + JSON.stringify(errors));
+      }
+
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: audioBlob,
+        headers: {
+          'Content-Type': audioBlob.type,
         }
-      }).result;
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed with status ${response.status}`);
+      }
 
       alert("Upload successful!");
     } catch (err) {
