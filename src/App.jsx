@@ -74,10 +74,10 @@ export default function App() {
     try {
       setIsUploading(true);
       // Determine file extension
-      let ext = 'webm';
+      let ext = 'wav';
       if (audioBlob.type.includes('mp4')) ext = 'mp4';
       else if (audioBlob.type.includes('ogg')) ext = 'ogg';
-      else if (audioBlob.type.includes('wav')) ext = 'wav';
+      else if (audioBlob.type.includes('webm')) ext = 'webm';
 
       const filename = `audio_${Date.now()}.${ext}`;
 
