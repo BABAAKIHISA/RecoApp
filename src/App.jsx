@@ -75,13 +75,17 @@ export default function App() {
       else if (audioBlob.type.includes('ogg')) ext = 'ogg';
       else if (audioBlob.type.includes('wav')) ext = 'wav';
 
-      const filename = `public/audio_${Date.now()}.${ext}`;
+      const filename = `audio_${Date.now()}.${ext}`;
 
       await uploadData({
-        path: filename,
+        path: () => `public/${filename}`,
         data: audioBlob,
         options: {
-          contentType: audioBlob.type
+          contentType: audioBlob.type,
+          bucket: {
+            bucketName: 'recoding-upload-baba',
+            region: 'ap-southeast-2'
+          }
         }
       }).result;
 
