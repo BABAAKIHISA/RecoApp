@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { uploadData } from 'aws-amplify/storage';
 import '@aws-amplify/ui-react/styles.css';
 
 export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState('');
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -36,13 +39,16 @@ export default function App() {
       mediaRecorderRef.current.onstop = () => {
         // Create the blob using the actual mimeType used by the recorder
         const actualMimeType = mediaRecorderRef.current.mimeType || 'audio/webm';
-        const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
-        const url = URL.createObjectURL(audioBlob);
+        const blob = new Blob(audioChunksRef.current, { type: actualMimeType });
+        const url = URL.createObjectURL(blob);
         setAudioURL(url);
+        setAudioBlob(blob);
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setAudioBlob(null); // Reset on new recording
+      setAudioURL('');
     } catch (err) {
       console.error("Error accessing microphone or initializing recorder:", err);
       alert("Error: Microphone access denied or recording not supported on this browser.");
@@ -56,6 +62,35 @@ export default function App() {
 
       // Stop all microphone tracks to release the recording indicator in the browser
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!audioBlob) return;
+    try {
+      setIsUploading(true);
+      // Determine file extension
+      let ext = 'webm';
+      if (audioBlob.type.includes('mp4')) ext = 'mp4';
+      else if (audioBlob.type.includes('ogg')) ext = 'ogg';
+      else if (audioBlob.type.includes('wav')) ext = 'wav';
+
+      const filename = `public/audio_${Date.now()}.${ext}`;
+
+      await uploadData({
+        path: filename,
+        data: audioBlob,
+        options: {
+          contentType: audioBlob.type
+        }
+      }).result;
+
+      alert("Upload successful!");
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -99,6 +134,26 @@ export default function App() {
               <div style={{ marginTop: '3rem', padding: '1.5rem', borderTop: '2px dashed #ccc' }}>
                 <h3>Playback</h3>
                 <audio src={audioURL} controls style={{ width: '100%', marginTop: '1rem' }} />
+
+                <div style={{ marginTop: '2rem' }}>
+                  <button
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    style={{
+                      padding: '1rem 2rem',
+                      background: isUploading ? '#9e9e9e' : '#2196F3',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: isUploading ? 'not-allowed' : 'pointer',
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    {isUploading ? '⏳ Uploading...' : '☁️ Upload to S3'}
+                  </button>
+                </div>
               </div>
             )}
           </section>
