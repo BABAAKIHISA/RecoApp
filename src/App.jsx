@@ -226,64 +226,62 @@ export default function App() {
               </button>
             </div>
 
-            {/* Main Content */}
+            {/* 録音 */}
             <section className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white overflow-hidden relative">
-              <div className="pt-10 border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4">
-                <h3 className="text-base font-semibold text-slate-700 mb-6 text-left flex items-center gap-2">
-                  <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  再生とアップロード
-                </h3>
-              </div>
               <div className="p-8 sm:p-12 text-center">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4 mb-6">
+                  <h3 className="text-base font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
+                    <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                    録音
+                  </h3>
 
-                {/* Recording Controls */}
-                <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-sm">
-                  <div className="flex flex-col items-center justify-center space-y-8 min-h-[200px]">
-                    <div className="relative flex flex-col items-center">
-                      {!isRecording ? (
-                        <button
-                          onClick={startRecording}
-                          className="group relative flex items-center justify-center w-28 h-28 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
-                        >
-                          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full transition-opacity"></div>
-                          <svg className="w-10 h-10 text-white translate-x-[2px]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C10.3 2 9 3.3 9 5v7c0 1.7 1.3 3 3 3s3-1.3 3-3V5c0-1.7-1.3-3-3-3zm0 14c-2.8 0-5.3-2.1-5.8-4.9H4.1C4.7 14.8 8 18 12 18s7.3-3.2 7.9-6.9h-2.1c-.5 2.8-3 4.9-5.8 4.9z" /><path d="M11 19h2v3h-2z" /></svg>
-                        </button>
-                      ) : (
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-60"></div>
+                  {/* Recording Controls */}
+                  <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-sm">
+                    <div className="flex flex-col items-center justify-center space-y-8 min-h-[200px]">
+                      <div className="relative flex flex-col items-center">
+                        {!isRecording ? (
                           <button
-                            onClick={stopRecording}
-                            className="group relative flex items-center justify-center w-28 h-28 bg-gradient-to-tr from-rose-500 to-red-500 rounded-full shadow-lg shadow-rose-500/40 transition-all duration-300 transform hover:scale-105 z-10"
+                            onClick={startRecording}
+                            className="group relative flex items-center justify-center w-28 h-28 bg-gradient-to-tr from-blue-500 to-indigo-500 rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
                           >
-                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></div>
-                            <div className="w-8 h-8 bg-white rounded-sm"></div>
+                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full transition-opacity"></div>
+                            <svg className="w-10 h-10 text-white translate-x-[2px]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C10.3 2 9 3.3 9 5v7c0 1.7 1.3 3 3 3s3-1.3 3-3V5c0-1.7-1.3-3-3-3zm0 14c-2.8 0-5.3-2.1-5.8-4.9H4.1C4.7 14.8 8 18 12 18s7.3-3.2 7.9-6.9h-2.1c-.5 2.8-3 4.9-5.8 4.9z" /><path d="M11 19h2v3h-2z" /></svg>
                           </button>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-60"></div>
+                            <button
+                              onClick={stopRecording}
+                              className="group relative flex items-center justify-center w-28 h-28 bg-gradient-to-tr from-rose-500 to-red-500 rounded-full shadow-lg shadow-rose-500/40 transition-all duration-300 transform hover:scale-105 z-10"
+                            >
+                              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></div>
+                              <div className="w-8 h-8 bg-white rounded-sm"></div>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="mb-10 space-y-3">
-
-                    <div className="h-6">
-                      {isRecording ? (
-                        <span className="text-rose-500 font-medium tracking-wide animate-pulse flex justify-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                          録音中...
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 font-medium text-sm">ボタンを押して録音してください。</span>
-                      )}
+                    <div className="mb-2 mt-8 space-y-3">
+                      <div className="h-6 flex justify-center">
+                        {isRecording ? (
+                          <span className="text-rose-500 font-medium tracking-wide animate-pulse flex justify-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-rose-500 mt-2"></span>
+                            録音中...
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 font-medium text-sm">ボタンを押して録音してください。</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Playback & Upload */}
                 {audioURL && (
-                  <div className="mt-12 pt-10 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4">
-                    <h3 className="text-base font-semibold text-slate-700 mb-6 text-left flex items-center gap-2">
+                  <div className="mt-12 pt-10 border-t border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4">
+                    <h3 className="text-base font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
                       <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
