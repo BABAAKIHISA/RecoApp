@@ -4,7 +4,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto flex items-center">
         <p className="text-2xl font-black tracking-tight text-gray-600">TRUST</p>
 
-        <p className="text-2xl font-black right tracking-tight text-gray-600">録音</p>
+        <button onClick={() => console.log('録音音声表示')}
+          className="ml-auto px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+        >
+          <span>録音音声表示</span>
+        </button>
 
       </div>
 
