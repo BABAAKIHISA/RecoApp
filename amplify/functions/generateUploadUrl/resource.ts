@@ -5,8 +5,3 @@ export const generateUploadUrl = defineFunction({
     entry: './handler.ts'
 });
 
-export const generateDownloadUrl = defineFunction({
-    name: 'generateDownloadUrl',
-    entry: './handler.ts'
-});
-
