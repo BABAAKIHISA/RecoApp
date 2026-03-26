@@ -15,7 +15,7 @@ export const handler: Schema['generateUploadUrl']['functionHandler'] = async (ev
 
     const command = new PutObjectCommand({
         Bucket: bucketName,
-        Key: `public/${filename}`,
+        Key: `${filename}`,
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
