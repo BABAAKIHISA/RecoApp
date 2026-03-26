@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { generateUploadUrl } from '../functions/generateUploadUrl/resource';
+import { listUploadedFiles } from '../functions/listUploadedFiles/resource';
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -14,6 +15,12 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.owner()]),
 
+  AudioFile: a.customType({
+    key: a.string().required(),
+    url: a.string().required(),
+    lastModified: a.string()
+  }),
+
   generateUploadUrl: a
     .query()
     .arguments({
@@ -21,6 +28,12 @@ const schema = a.schema({
     })
     .returns(a.string())
     .handler(a.handler.function(generateUploadUrl))
+    .authorization((allow) => [allow.authenticated()]),
+
+  listUploadedFiles: a
+    .query()
+    .returns(a.ref('AudioFile').array())
+    .handler(a.handler.function(listUploadedFiles))
     .authorization((allow) => [allow.authenticated()]),
 });
 

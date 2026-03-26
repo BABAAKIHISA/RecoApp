@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { generateUploadUrl } from './functions/generateUploadUrl/resource';
+import { listUploadedFiles } from './functions/listUploadedFiles/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 /**
@@ -11,14 +12,19 @@ const backend = defineBackend({
   auth,
   data,
   generateUploadUrl,
+  listUploadedFiles,
 });
 
-backend.generateUploadUrl.resources.lambda.addToRolePolicy(
-  new PolicyStatement({
-    actions: ['s3:PutObject', 's3:GetObject', 's3:DeleteObject', 's3:ListBucket'],
-    resources: ['arn:aws:s3:::recoding-upload-baba/*']
-  })
-);
+const s3Policy = new PolicyStatement({
+  actions: ['s3:PutObject', 's3:GetObject', 's3:DeleteObject', 's3:ListBucket'],
+  resources: [
+    'arn:aws:s3:::recoding-upload-baba',
+    'arn:aws:s3:::recoding-upload-baba/*'
+  ]
+});
+
+backend.generateUploadUrl.resources.lambda.addToRolePolicy(s3Policy);
+backend.listUploadedFiles.resources.lambda.addToRolePolicy(s3Policy);
 
 backend.addOutput({
   storage: {
