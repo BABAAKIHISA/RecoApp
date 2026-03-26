@@ -9,9 +9,7 @@ export default function Header() {
         >
           <span>録音音声表示</span>
         </button>
-
       </div>
-
     </header>
 
   );

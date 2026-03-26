@@ -128,7 +128,7 @@ export default function RecordingSection() {
     <section className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white overflow-hidden relative">
       <div className="p-8 sm:p-12 text-center">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4 mb-6">
-          <h3 className="text-base font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
+          <h3 className="text-xl font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
             <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
@@ -177,7 +177,7 @@ export default function RecordingSection() {
 
         {audioURL && (
           <div className="mt-12 pt-10 border-t border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 fade-in-0 px-4">
-            <h3 className="text-base font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-slate-700 mb-3 text-left flex items-center gap-2">
               <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
