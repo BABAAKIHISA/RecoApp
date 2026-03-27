@@ -11,7 +11,7 @@ export default function AudioList({ onClose }) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchUploadedFiles = async () => {
       try {
         const { data, errors } = await client.queries.listUploadedFiles({}, { authMode: 'userPool' });
@@ -41,11 +41,11 @@ export default function AudioList({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* 背景のオーバーレイ */}
-      <div 
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+      <div
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       ></div>
-      
+
       {/* モーダル本体 */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -55,7 +55,7 @@ export default function AudioList({ onClose }) {
             </svg>
             過去の録音音声一覧
           </h3>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors"
           >
@@ -88,7 +88,7 @@ export default function AudioList({ onClose }) {
                   <div className="flex justify-between items-center text-sm text-slate-600">
                     <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
                     {file.lastModified && (
-                      <span className="text-slate-400 text-xs shrink-0 font-medium bg-slate-100 px-2 py-1 rounded-md">
+                      <span className="text-indigo-500 text-xs shrink-0 font-semibold bg-indigo-100 px-2 py-1 rounded-md">
                         {new Date(file.lastModified).toLocaleString('ja-JP')}
                       </span>
                     )}
