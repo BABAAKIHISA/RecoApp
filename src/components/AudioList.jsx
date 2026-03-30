@@ -8,6 +8,8 @@ const client = generateClient({
 export default function AudioList({ onClose }) {
   const [recordedFiles, setRecordedFiles] = useState([]);
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
+  const [searchInput, setSearchInput] = useState('')
+  const [filteredFiles, setFilteredFiles] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,6 +40,14 @@ export default function AudioList({ onClose }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (searchInput.length > 0) {
+      setFilteredFiles(recordedFiles.filter((file) => file.key.includes(searchInput)));
+    } else {
+      setFilteredFiles(recordedFiles);
+    }
+  }, [searchInput, recordedFiles]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* 背景のオーバーレイ */}
@@ -55,6 +65,7 @@ export default function AudioList({ onClose }) {
             </svg>
             過去の録音音声一覧
           </h3>
+          <input type='text' placeholder='音声を検索' className='ml-auto px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-xl' value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
           <button
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors"
