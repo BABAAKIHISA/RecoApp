@@ -121,6 +121,9 @@ export default function AudioList({ onClose }) {
                     )}
                   </div>
                   <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
+                  <button onClick={() => console.log(`${file.key}を削除します`)} className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+                    削除
+                  </button>
                 </li>
               ))}
             </ul>
