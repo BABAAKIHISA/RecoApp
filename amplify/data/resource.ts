@@ -38,7 +38,11 @@ const schema = a.schema({
     .authorization((allow) => [allow.authenticated()]),
 
   deleteUploadedFiles: a
-    .query()
+    .mutation()
+    .arguments({
+      filename: a.string().required(),
+    })
+    .returns(a.boolean())
     .handler(a.handler.function(deleteUploadedFiles))
     .authorization((allow) => [allow.authenticated()]),
 });
