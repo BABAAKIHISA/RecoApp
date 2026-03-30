@@ -98,7 +98,7 @@ export default function RecordingSection() {
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const seconds = date.getSeconds();
-      const filename = `${year}${month}${day}${hours}${minutes}${seconds}.${ext}`;
+      const filename = `${year}年${month}月${day}日${hours}時${minutes}分${seconds}秒.${ext}`;
 
       const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
         filename: filename
