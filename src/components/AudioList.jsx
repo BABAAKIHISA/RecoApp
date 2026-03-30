@@ -49,7 +49,12 @@ export default function AudioList({ onClose }) {
   }, [searchInput, recordedFiles]);
 
   const handleDelete = async (filename) => {
-    console.log(`削除する${filename}`);
+    try {
+      client.mutations.deleteUploadedFiles({ filename })
+    } catch (err) {
+      alert("音声ファイルの削除に失敗しました。");
+    }
+    setRecordedFiles(recordedFiles.filter((file) => file.key !== filename))
   }
 
   return (
