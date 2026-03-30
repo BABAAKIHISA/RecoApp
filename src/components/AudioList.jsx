@@ -101,22 +101,6 @@ export default function AudioList({ onClose }) {
               </svg>
               <p className="text-slate-500 font-medium">アップロードされた音声はありません。</p>
             </div>
-          ) : searchInput.length === 0 ? (
-            <ul className="space-y-4 text-left">
-              {recordedFiles.map((file) => (
-                <li key={file.key} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center text-sm text-slate-600">
-                    <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
-                    {file.lastModified && (
-                      <span className="text-indigo-500 text-xs shrink-0 font-semibold bg-indigo-100 px-2 py-1 rounded-md">
-                        {new Date(file.lastModified).toLocaleString('ja-JP')}
-                      </span>
-                    )}
-                  </div>
-                  <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
-                </li>
-              ))}
-            </ul>
           ) : (
             <ul className="space-y-4 text-left">
               {filteredFiles.map((file) => (
@@ -130,9 +114,11 @@ export default function AudioList({ onClose }) {
                     )}
                   </div>
                   <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
-                  <button onClick={() => handleDelete(file.key)} className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
-                    <span>削除</span>
-                  </button>
+                  <div className="flex justify-end">
+                    <button onClick={() => handleDelete(file.key)} className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+                      <span>削除</span>
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
