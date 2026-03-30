@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { generateUploadUrl } from '../functions/generateUploadUrl/resource';
 import { listUploadedFiles } from '../functions/listUploadedFiles/resource';
+import { deleteUploadedFiles } from '../functions/deleteUploadedFiles/resource';
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -34,6 +35,11 @@ const schema = a.schema({
     .query()
     .returns(a.ref('AudioFile').array())
     .handler(a.handler.function(listUploadedFiles))
+    .authorization((allow) => [allow.authenticated()]),
+
+  deleteUploadedFiles: a
+    .query()
+    .handler(a.handler.function(deleteUploadedFiles))
     .authorization((allow) => [allow.authenticated()]),
 });
 
