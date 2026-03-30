@@ -91,7 +91,14 @@ export default function RecordingSection() {
       else if (audioBlob.type.includes('ogg')) ext = 'ogg';
       else if (audioBlob.type.includes('webm')) ext = 'webm';
 
-      const filename = `audio_${Date.now()}.${ext}`;
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const seconds = date.getSeconds();
+      const filename = `${year}${month}${day}${hours}${minutes}${seconds}.${ext}`;
 
       const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
         filename: filename
