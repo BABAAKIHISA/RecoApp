@@ -12,6 +12,7 @@ export default function RecordingSection() {
   const [audioBlob, setAudioBlob] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [filename, setFilename] = useState('');
+  const [Uploaded, setUploaded] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -80,11 +81,11 @@ export default function RecordingSection() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+
       let ext = 'wav';
       if (audioBlob.type.includes('mp4')) ext = 'mp4';
       else if (audioBlob.type.includes('ogg')) ext = 'ogg';
       else if (audioBlob.type.includes('webm')) ext = 'webm';
-
       const date = new Date();
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
@@ -93,6 +94,7 @@ export default function RecordingSection() {
       const minutes = date.getMinutes();
       const seconds = date.getSeconds();
       setFilename(`${year}年${month}月${day}日${hours}時${minutes}分${seconds}秒.${ext}`);
+      setUploaded(false)
     }
   };
 
@@ -123,7 +125,8 @@ export default function RecordingSection() {
         throw new Error(`Upload failed with status ${response.status}`);
       }
 
-      alert("Upload successful!");
+      alert("アップロードが完了しました");
+      setUploaded(true);
     } catch (err) {
       console.error("Upload error:", err);
       alert("Upload failed. Please try again.");
@@ -197,6 +200,7 @@ export default function RecordingSection() {
               <audio src={audioURL} controls className="w-full h-12 outline-none rounded-lg" />
 
               <div className="mt-8 flex justify-end">
+                <edit type="text" value={filename} placeholder={`${filename}`} onChange={(e) => setFilename(e.target.value)} />
                 <button
                   onClick={handleUpload}
                   disabled={isUploading}
@@ -220,6 +224,14 @@ export default function RecordingSection() {
                     </>
                   )}
                 </button>
+                {Uploaded && (
+                  <div
+                    className="group relative flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-md hover:shadow-rose-500/30 transform hover:-translate-y-0.5"
+                  >
+                    <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <span>アップロード済み</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
