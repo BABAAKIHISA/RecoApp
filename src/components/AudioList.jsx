@@ -10,6 +10,8 @@ export default function AudioList({ onClose }) {
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
   const [searchInput, setSearchInput] = useState('')
   const [filteredFiles, setFilteredFiles] = useState([]);
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,14 +50,20 @@ export default function AudioList({ onClose }) {
     }
   }, [searchInput, recordedFiles]);
 
-  const handleDelete = async (filename) => {
+  const executeDelete = async () => {
+    if (!fileToDelete) return;
+    setIsDeleting(true);
     try {
-      client.mutations.deleteUploadedFiles({ filename })
+      await client.mutations.deleteUploadedFiles({ filename: fileToDelete });
+      setRecordedFiles(recordedFiles.filter((file) => file.key !== fileToDelete));
     } catch (err) {
+      console.error(err);
       alert("音声ファイルの削除に失敗しました。");
+    } finally {
+      setIsDeleting(false);
+      setFileToDelete(null);
     }
-    setRecordedFiles(recordedFiles.filter((file) => file.key !== filename))
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -115,8 +123,14 @@ export default function AudioList({ onClose }) {
                   </div>
                   <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
                   <div className="flex justify-end">
-                    <button onClick={() => handleDelete(file.key)} className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
-                      <span>削除</span>
+                    <button
+                      onClick={() => setFileToDelete(file.key)}
+                      className="px-3 py-1.5 text-xs font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      削除
                     </button>
                   </div>
                 </li>
@@ -125,6 +139,40 @@ export default function AudioList({ onClose }) {
           )}
         </div>
       </div>
+
+      {/* 削除確認モーダル */}
+      {fileToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => !isDeleting && setFileToDelete(null)}></div>
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-red-600 mb-4">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h4 className="text-lg font-bold text-slate-800">削除の確認</h4>
+            </div>
+            <p className="text-slate-600 mb-6 text-sm">
+              <span className="font-semibold text-slate-700">{fileToDelete.split('/').pop()}</span> <br />を本当に削除しますか？<br />この操作は取り消せません。
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setFileToDelete(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={executeDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors flex items-center disabled:opacity-50"
+              >
+                {isDeleting ? '削除中...' : '削除する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
