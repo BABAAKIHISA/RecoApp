@@ -11,6 +11,7 @@ export default function RecordingSection() {
   const [audioURL, setAudioURL] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [filename, setFilename] = useState('');
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -79,13 +80,6 @@ export default function RecordingSection() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!audioBlob) return;
-    try {
-      setIsUploading(true);
       let ext = 'wav';
       if (audioBlob.type.includes('mp4')) ext = 'mp4';
       else if (audioBlob.type.includes('ogg')) ext = 'ogg';
@@ -98,7 +92,14 @@ export default function RecordingSection() {
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const seconds = date.getSeconds();
-      const filename = `${year}年${month}月${day}日${hours}時${minutes}分${seconds}秒.${ext}`;
+      setFilename(`${year}年${month}月${day}日${hours}時${minutes}分${seconds}秒.${ext}`);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!audioBlob) return;
+    try {
+      setIsUploading(true);
 
       const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
         filename: filename
