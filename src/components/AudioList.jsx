@@ -103,7 +103,7 @@ export default function AudioList({ onClose }) {
               <p className="text-slate-500 font-medium">音声を読み込んでいます...</p>
             </div>
           ) : recordedFiles.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-300 shadow-sm">
               <svg className="mx-auto h-12 w-12 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
               </svg>
@@ -112,7 +112,7 @@ export default function AudioList({ onClose }) {
           ) : (
             <ul className="space-y-4 text-left">
               {filteredFiles.map((file) => (
-                <li key={file.key} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
+                <li key={file.key} className="bg-white rounded-2xl p-5 border border-slate-300 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-center text-sm text-slate-600">
                     <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
                     {file.lastModified && (
