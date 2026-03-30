@@ -13,6 +13,7 @@ export default function RecordingSection() {
   const [isUploading, setIsUploading] = useState(false);
   const [filename, setFilename] = useState('');
   const [Uploaded, setUploaded] = useState(false);
+  const [fileExtension, setFileExtension] = useState('.wav');
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -55,6 +56,7 @@ export default function RecordingSection() {
 
             setAudioURL(url);
             setAudioBlob(wavBlob);
+            setFileExtension('.wav');
           };
 
           fileReader.readAsArrayBuffer(webmBlob);
@@ -63,6 +65,11 @@ export default function RecordingSection() {
           const url = URL.createObjectURL(webmBlob);
           setAudioURL(url);
           setAudioBlob(webmBlob);
+
+          let ext = '.webm';
+          if (webmBlob.type.includes('mp4')) ext = '.mp4';
+          else if (webmBlob.type.includes('ogg')) ext = '.ogg';
+          setFileExtension(ext);
         }
       };
 
@@ -82,29 +89,29 @@ export default function RecordingSection() {
       setIsRecording(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
 
-      let ext = 'wav';
-      if (audioBlob.type.includes('mp4')) ext = 'mp4';
-      else if (audioBlob.type.includes('ogg')) ext = 'ogg';
-      else if (audioBlob.type.includes('webm')) ext = 'webm';
       const date = new Date();
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const day = date.getDate();
-      const hours = date.getHours();
+      const hours = date.getHours()
       const minutes = date.getMinutes();
       const seconds = date.getSeconds();
-      setFilename(`${year}年${month}月${day}日${hours}時${minutes}分${seconds}秒.${ext}`);
-      setUploaded(false)
+      setFilename(`${year}年${month}月${day}日_${hours}時${minutes}分${seconds}秒`);
+      setUploaded(false);
     }
   };
 
   const handleUpload = async () => {
     if (!audioBlob) return;
+
+    // ユーザーが拡張子を消してしまっても大丈夫なように、最終的なファイル名を生成
+    const finalFilename = filename.endsWith(fileExtension) ? filename : filename + fileExtension;
+
     try {
       setIsUploading(true);
 
       const { data: uploadUrl, errors } = await client.queries.generateUploadUrl({
-        filename: filename
+        filename: finalFilename
       }, {
         authMode: 'userPool'
       });
@@ -193,45 +200,66 @@ export default function RecordingSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              再生とアップロード
+              再生　名前編集　アップロード
             </h3>
 
             <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-sm">
               <audio src={audioURL} controls className="w-full h-12 outline-none rounded-lg" />
 
-              <div className="mt-8 flex justify-end">
-                <edit type="text" value={filename} placeholder={`${filename}`} onChange={(e) => setFilename(e.target.value)} />
-                <button
-                  onClick={handleUpload}
-                  disabled={isUploading}
-                  className={`group relative flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 ${isUploading
-                    ? 'bg-slate-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md hover:shadow-indigo-500/30 transform hover:-translate-y-0.5'
-                    }`}
-                >
-                  {isUploading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>アップロード中...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                      <span>アップロード</span>
-                    </>
-                  )}
-                </button>
-                {Uploaded && (
-                  <div
-                    className="group relative flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-md hover:shadow-rose-500/30 transform hover:-translate-y-0.5"
-                  >
-                    <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    <span>アップロード済み</span>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* ファイル名編集部分 */}
+                <div className="relative w-full sm:max-w-sm flex-grow">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
                   </div>
-                )}
+                  <input
+                    type="text"
+                    value={filename}
+                    onChange={(e) => setFilename(e.target.value)}
+                    className="block w-full pl-10 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                    placeholder="ファイル名を入力..."
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span className="text-slate-400 text-sm font-medium">{fileExtension}</span>
+                  </div>
+                </div>
+
+                {/* アップロードボタン群 */}
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
+                  <button
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    className={`group relative flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 ${isUploading
+                      ? 'bg-slate-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md hover:shadow-indigo-500/30 transform hover:-translate-y-0.5'
+                      }`}
+                  >
+                    {isUploading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>アップロード中...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>アップロード</span>
+                      </>
+                    )}
+                  </button>
+                  {Uploaded && (
+                    <div
+                      className="group relative flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 bg-gradient-to-r from-teal-500 to-emerald-500 shadow-md"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      <span>アップロード済み</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
