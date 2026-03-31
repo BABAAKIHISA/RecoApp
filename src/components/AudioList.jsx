@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
+import WaveSurfer from 'wavesurfer.js';
 
 const client = generateClient({
   authMode: 'userPool'
@@ -112,28 +113,11 @@ export default function AudioList({ onClose }) {
           ) : (
             <ul className="space-y-4 text-left">
               {filteredFiles.map((file) => (
-                <li key={file.key} className="bg-white rounded-2xl p-5 border border-slate-300 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center text-sm text-slate-600">
-                    <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
-                    {file.lastModified && (
-                      <span className="text-indigo-500 text-xs shrink-0 font-semibold bg-indigo-100 px-2 py-1 rounded-md">
-                        {new Date(file.lastModified).toLocaleString('ja-JP')}
-                      </span>
-                    )}
-                  </div>
-                  <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => setFileToDelete(file.key)}
-                      className="px-3 py-1 text-xs font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      削除
-                    </button>
-                  </div>
-                </li>
+                <AudioListItem
+                  key={file.key}
+                  file={file}
+                  onDelete={() => setFileToDelete(file.key)}
+                />
               ))}
             </ul>
           )}
@@ -176,3 +160,99 @@ export default function AudioList({ onClose }) {
     </div>
   );
 }
+
+
+function AudioListItem({ file, onDelete }) {
+  const [showWaveform, setShowWaveform] = useState(false); // 波形を表示するかどうか
+  const [isPlaying, setIsPlaying] = useState(false);
+  const waveformRef = useRef(null);
+  const wavesurferRef = useRef(null);
+  // 波形表示ボタンが押されたら WaveSurfer を準備する処理
+  useEffect(() => {
+    // showWaveformが true になり、かつまだWaveSurferが作られていなければ作成
+    if (showWaveform && waveformRef.current && !wavesurferRef.current) {
+      wavesurferRef.current = WaveSurfer.create({
+        container: waveformRef.current,
+        waveColor: '#818cf8',
+        progressColor: '#4f46e5',
+        cursorColor: '#312e81',
+        height: 60,
+        normalize: true,
+      });
+
+      wavesurferRef.current.load(file.url);
+
+      wavesurferRef.current.on('finish', () => {
+        setIsPlaying(false);
+      });
+    }
+  }, [showWaveform, file.url]); // ボタンが押されたことを感知して動く
+  // リストから削除された時など、画面から消える時にメモリを掃除する処理
+  useEffect(() => {
+    return () => {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+      }
+    };
+  }, []);
+  const togglePlayPause = () => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.playPause();
+      setIsPlaying(!isPlaying);
+    }
+  };
+  return (
+    <li className="bg-white rounded-2xl p-5 border border-slate-300 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
+      {/* 1. タイトルと日付 */}
+      <div className="flex justify-between items-center text-sm text-slate-600">
+        <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
+        {file.lastModified && (
+          <span className="text-indigo-500 text-xs shrink-0 font-semibold bg-indigo-100 px-2 py-1 rounded-md">
+            {new Date(file.lastModified).toLocaleString('ja-JP')}
+          </span>
+        )}
+      </div>
+      {/* 2. 音声プレイヤー部分（波形を表示するかどうかで分岐） */}
+      {!showWaveform ? (
+        <div className="flex items-center gap-3">
+          {/* 今までの標準プレイヤー */}
+          <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
+          {/* 波形表示ボタン */}
+          <button
+            onClick={() => setShowWaveform(true)}
+            className="shrink-0 px-3 py-2 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors shadow-sm"
+          >
+            波形を生成
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <button
+            onClick={togglePlayPause}
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-colors"
+          >
+            {isPlaying ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+            ) : (
+              <svg className="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+            )}
+          </button>
+          <div ref={waveformRef} className="flex-grow overflow-hidden cursor-pointer" />
+        </div>
+      )}
+      {/* 3. 削除ボタン */}
+      <div className="flex justify-end">
+        <button
+          onClick={onDelete}
+          className="px-3 py-1 text-xs font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          削除
+        </button>
+      </div>
+    </li>
+  );
+}
+// ▲▲▲ 追加はここまで ▲▲▲
