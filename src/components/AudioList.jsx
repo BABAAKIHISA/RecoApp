@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import WaveSurfer from 'wavesurfer.js';
 
