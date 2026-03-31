@@ -176,8 +176,12 @@ function AudioListItem({ file, onDelete }) {
         waveColor: '#818cf8',
         progressColor: '#4f46e5',
         cursorColor: '#312e81',
-        height: 60,
+        height: 100,
         normalize: true,
+        minPxPerSec: 300,
+        autoScroll: true,
+        sampleRate: 44100,
+        pixelRatio: window.devicePixelRatio * 2,
       });
       wavesurferRef.current.load(file.url);
       wavesurferRef.current.on('finish', () => {

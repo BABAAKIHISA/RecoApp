@@ -32,7 +32,7 @@ export default function RecordingSection() {
         cursorColor: '#312e81',
         height: 100,
         normalize: true,
-        minPxPerSec: 400,
+        minPxPerSec: 300,
         autoScroll: true,
         sampleRate: 44100,
         pixelRatio: window.devicePixelRatio * 2,
