@@ -162,14 +162,14 @@ export default function AudioList({ onClose }) {
 }
 
 
+// ▼▼▼ ここから置き換え ▼▼▼
 function AudioListItem({ file, onDelete }) {
-  const [showWaveform, setShowWaveform] = useState(false); // 波形を表示するかどうか
+  const [showWaveform, setShowWaveform] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const waveformRef = useRef(null);
   const wavesurferRef = useRef(null);
-  // 波形表示ボタンが押されたら WaveSurfer を準備する処理
   useEffect(() => {
-    // showWaveformが true になり、かつまだWaveSurferが作られていなければ作成
+    // 1. 波形を開いた時の初期化処理
     if (showWaveform && waveformRef.current && !wavesurferRef.current) {
       wavesurferRef.current = WaveSurfer.create({
         container: waveformRef.current,
@@ -179,15 +179,19 @@ function AudioListItem({ file, onDelete }) {
         height: 60,
         normalize: true,
       });
-
       wavesurferRef.current.load(file.url);
-
       wavesurferRef.current.on('finish', () => {
         setIsPlaying(false);
       });
     }
-  }, [showWaveform, file.url]); // ボタンが押されたことを感知して動く
-  // リストから削除された時など、画面から消える時にメモリを掃除する処理
+    // 2. 波形を閉じた時にメモリを解放して音を止める処理
+    if (!showWaveform && wavesurferRef.current) {
+      wavesurferRef.current.destroy();
+      wavesurferRef.current = null;
+      setIsPlaying(false);
+    }
+  }, [showWaveform, file.url]);
+  // コンポーネント自体が消える時用のお掃除
   useEffect(() => {
     return () => {
       if (wavesurferRef.current) {
@@ -202,8 +206,9 @@ function AudioListItem({ file, onDelete }) {
     }
   };
   return (
-    <li className="bg-white rounded-2xl p-5 border border-slate-300 shadow-sm flex flex-col space-y-3 hover:shadow-md transition-shadow">
-      {/* 1. タイトルと日付 */}
+    <li className="bg-white rounded-2xl p-5 border border-slate-300 shadow-sm flex flex-col space-y-4 hover:shadow-md transition-shadow">
+
+      {/* --- 1. タイトルと日付 --- */}
       <div className="flex justify-between items-center text-sm text-slate-600">
         <span className="font-semibold text-slate-700 truncate mr-2" title={file.key}>{file.key.split('/').pop()}</span>
         {file.lastModified && (
@@ -212,39 +217,66 @@ function AudioListItem({ file, onDelete }) {
           </span>
         )}
       </div>
-      {/* 2. 音声プレイヤー部分（波形を表示するかどうかで分岐） */}
-      {!showWaveform ? (
-        <div className="flex items-center gap-3">
-          {/* 今までの標準プレイヤー */}
-          <audio src={file.url} controls className="w-full h-10 outline-none rounded" />
-          {/* 波形表示ボタン */}
-          <button
-            onClick={() => setShowWaveform(true)}
-            className="shrink-0 px-3 py-2 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors shadow-sm"
-          >
-            波形を生成
-          </button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <button
-            onClick={togglePlayPause}
-            className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-colors"
-          >
-            {isPlaying ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
-            ) : (
-              <svg className="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-            )}
-          </button>
-          <div ref={waveformRef} className="flex-grow overflow-hidden cursor-pointer" />
-        </div>
-      )}
-      {/* 3. 削除ボタン */}
-      <div className="flex justify-end">
+      {/* --- 2. 音声プレイヤーエリア --- */}
+      {/* min-h-[3rem] (約48px) を指定し、切り替わり時の高さのガタつきを軽減します */}
+      <div className="min-h-[3rem] w-full">
+        {!showWaveform ? (
+          // 【標準プレイヤー】 （ふわっと表示するアニメーション付き）
+          <div className="animate-in fade-in duration-300">
+            <audio src={file.url} controls className="w-full h-12 outline-none rounded-lg" />
+          </div>
+        ) : (
+          // 【WaveSurferプレイヤー】 （ふわっと表示するアニメーション付き）
+          <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner animate-in fade-in zoom-in-95 duration-300">
+            <button
+              onClick={togglePlayPause}
+              className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-all transform hover:scale-105 shadow-md"
+            >
+              {isPlaying ? (
+                // 一時停止アイコン
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+              ) : (
+                // 再生アイコン
+                <svg className="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+              )}
+            </button>
+            <div ref={waveformRef} className="flex-grow overflow-hidden cursor-pointer" />
+          </div>
+        )}
+      </div>
+      {/* --- 3. ボタンエリア（下部にまとめて配置） --- */}
+      <div className="flex justify-end items-center gap-3 pt-2 border-t border-slate-100 mt-2">
+
+        {/* ▼▼▼ 波形表示・非表示トグルボタン ▼▼▼ */}
+        <button
+          onClick={() => setShowWaveform(!showWaveform)}
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${showWaveform
+            ? 'text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200'  // 開いている時（控えめな色）
+            : 'text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100' // 閉じている時（押したくなる色）
+            }`}
+        >
+          {showWaveform ? (
+            <>
+              {/* 開いている時は上矢印アイコン */}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+              波形を閉じる
+            </>
+          ) : (
+            <>
+              {/* 閉じている時は下（開く）矢印アイコン */}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+              波形を表示
+            </>
+          )}
+        </button>
+        {/* ▼▼▼ 削除ボタン ▼▼▼ */}
         <button
           onClick={onDelete}
-          className="px-3 py-1 text-xs font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 text-xs font-semibold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1.5"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -255,4 +287,4 @@ function AudioListItem({ file, onDelete }) {
     </li>
   );
 }
-// ▲▲▲ 追加はここまで ▲▲▲
+// ▲▲▲ 置き換えはここまで ▲▲▲
