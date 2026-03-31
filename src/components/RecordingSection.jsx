@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import { audioBufferToWav } from '../utils/audioUtils';
+import WaveSurfer from 'wavesurfer.js';
 
 const client = generateClient({
   authMode: 'userPool'
@@ -18,9 +19,47 @@ export default function RecordingSection() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  const waveformRef = useRef(null);
+  const wavesurferRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (audioURL && waveformRef.current) {
+      wavesurferRef.current = WaveSurfer.create({
+        container: waveformRef.current,
+        waveColor: '#818cf8',
+        progressColor: '#4f46e5',
+        cursorColor: '#312e81',
+        height: 100,
+        normalize: true,
+        minPxPerSec: 400,
+        autoScroll: true,
+        sampleRate: 44100,
+        pixelRatio: window.devicePixelRatio * 2,
+      });
+      wavesurferRef.current.load(audioURL);
+
+      wavesurferRef.current.on('finish', () => {
+        setIsPlaying(false);
+      });
+
+      return () => {
+        if (wavesurferRef.current) {
+          wavesurferRef.current.destroy();
+        }
+      };
+    }
+  }, [audioURL]);
+
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: false,
+        }
+      });
 
       let options = {};
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
@@ -142,6 +181,13 @@ export default function RecordingSection() {
     }
   };
 
+  const togglePlayPause = () => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.playPause();
+      setIsPlaying(!isPlaying);
+    }
+  };
+
   return (
     <section className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white overflow-hidden relative">
       <div className="p-8 sm:p-12 text-center">
@@ -204,7 +250,32 @@ export default function RecordingSection() {
             </h3>
 
             <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-sm">
-              <audio src={audioURL} controls className="w-full h-12 outline-none rounded-lg" />
+              {/* === 新しいカスタムプレイヤー開始 === */}
+              <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200">
+
+                {/* 1. 再生/一時停止ボタン */}
+                <button
+                  onClick={togglePlayPause}
+                  className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-md shadow-indigo-500/30"
+                >
+                  {isPlaying ? (
+                    /* 一時停止アイコン (||) */
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                    </svg>
+                  ) : (
+                    /* 再生アイコン (▶) */
+                    <svg className="w-6 h-6 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* 2. 波形が表示されるエリア（ここで ref を紐付ける） */}
+                <div ref={waveformRef} className="flex-grow overflow-hidden cursor-pointer" />
+              </div>
+              {/* === 新しいカスタムプレイヤー終了 === */}
+
 
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                 {/* ファイル名編集部分 */}
